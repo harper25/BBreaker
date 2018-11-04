@@ -3,6 +3,8 @@ import math
 
 
 class Ball(pygame.sprite.Sprite):
+    timer = pygame.USEREVENT + 1
+
     def __init__(self, surface, x, y, speed=10, size=10):
         pygame.sprite.Sprite.__init__(self)
         self.screen_width, self.screen_height = \
@@ -18,20 +20,19 @@ class Ball(pygame.sprite.Sprite):
         self.draw(surface, self._color)
 
     def update(self, surface):
-        # future: draw_background() before the call to Ball.move()
-        self.draw(surface, (0, 0, 0))
-        if self.x < self.size/2 or self.x > self.screen_width - self.size/2:
-            self.vx = -self.vx
-        if self.y < self.size/2:
-            self.vy = -self.vy
-        if self.y > self.screen_height - 2*self.size:
-            self.x = 350
-            self.y = 400
-            self.game_on = False
+        if self.game_on:
+            if self.x < self.size/2 or self.x > self.screen_width - self.size/2:
+                self.vx = -self.vx
+            if self.y < self.size/2:
+                self.vy = -self.vy
+            if self.y > self.screen_height - 2*self.size:
+                self.x = 350
+                self.y = 400
+                self.game_on = False
 
-        self.x = self.x + self.vx
-        self.y = self.y + self.vy
-        self.draw(surface, (255, 255, 255))
+            self.x = self.x + self.vx
+            self.y = self.y + self.vy
+            self.draw(surface, self._color)
 
     def draw(self, surface, color):
         pygame.draw.circle(surface, color, (self.x, self.y), self.size)
