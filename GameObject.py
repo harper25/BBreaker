@@ -15,7 +15,7 @@ class GameObject():
         self.surface = pygame.display.set_mode((self.screen_width, self.screen_height))
         self.init_position = (2*self.screen_width//2, 10*self.brick_size)
         self.game_on = False
-        self.if_next_level = True
+        self.next_level = True
 
     @staticmethod
     def show(balls, bricks):
@@ -32,28 +32,17 @@ class GameObject():
         bricks.update(self.surface)
         pygame.display.update()
 
-        ball_game_on = {ball.game_on for ball in balls}
-
-        print(ball_game_on)
-        if len(ball_game_on) == 1 and not ball_game_on:  # ?
+        if {ball.game_on for ball in balls} == {False}:
             self.game_on = False
-            self.generate_next_level = True
 
     def generate_next_level(self, balls, bricks):
         print("GENERATE!!!!!!!!!!!!!!!!!!!!!!!")
 
         br1 = Brick(pygame.Rect(self.brick_size, self.brick_size, self.brick_size, self.brick_size), number=12, color=(30, 240, 20))
-        br1.draw(self.surface)
+        # br1.draw(self.surface)
 
         br2 = Brick(pygame.Rect(3*self.brick_size, 2*self.brick_size, self.brick_size, self.brick_size), number=34, color=(200, 60, 80))
-        br2.draw(self.surface)
-
-        ball_speed = 10
-        ball1 = Ball(self.surface, 350, 400, ball_speed, 10)
-        ball2 = Ball(self.surface, 350, 400, ball_speed, 10)
-        ball3 = Ball(self.surface, 350, 400, ball_speed, 10)
-
-        balls.add(ball1, ball2, ball3)
+        # br2.draw(self.surface)
         bricks.add(br1, br2)
 
         new_ball = Ball(self.surface, 350, 400, 10, 10)
@@ -61,5 +50,5 @@ class GameObject():
 
         print('LENGTH BALLS: ', len(balls))
 
-        self._update(balls, bricks)
-        self.if_next_level = False
+        # self._update(balls, bricks)
+        self.next_level = False

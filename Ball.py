@@ -25,14 +25,16 @@ class Ball(pygame.sprite.Sprite):
                 self.vx = -self.vx
             if self.y < self.size/2:
                 self.vy = -self.vy
+            
+            self.x = self.x + self.vx
+            self.y = self.y + self.vy
+
             if self.y > self.screen_height - 2*self.size:
                 self.x = 350
                 self.y = 400
                 self.game_on = False
 
-            self.x = self.x + self.vx
-            self.y = self.y + self.vy
-            self.draw(surface, self._color)
+        self.draw(surface, self._color)
 
     def draw(self, surface, color):
         pygame.draw.circle(surface, color, (self.x, self.y), self.size)

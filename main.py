@@ -40,11 +40,10 @@ def main():
 
     balls_count = 0
     while True:
-
-        if game.if_next_level:
+        # print(game.if_next_level)
+        if not game.game_on and game.next_level:
             game.generate_next_level(balls, bricks)
             # print(game.if_next_level)
-            continue
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -59,7 +58,7 @@ def main():
                     print(event.pos)
                     start_pos = event.pos
 
-            if event.type == pygame.MOUSEBUTTONUP:
+            if event.type == pygame.MOUSEBUTTONUP and not game.game_on:
                 if pygame.mouse.get_pressed()[0] == 0 and start_pos != [-1,-1]:
                     end_pos = event.pos
                     if end_pos[1] > start_pos[1]:
@@ -68,6 +67,7 @@ def main():
                             # ball.game_on = True
                         # game_on = True
                         game.game_on = True
+                        game.next_level = True
                         pygame.time.set_timer(Ball.timer, 150)
                         balls.sprites()[0].game_on = True
                         # ball timer ilość i czas uzależniony od len(balls)
@@ -88,13 +88,13 @@ def main():
             if event.type == Ball.timer:
                 
                 balls_count += 1
-                print("Ball.timer! balls_count = ", balls_count)
+                # print("Ball.timer! balls_count = ", balls_count)
                 if balls_count < len(balls):
                     balls.sprites()[balls_count].game_on = True
-                    print("True")
+                    # print("True")
                 else:
                     pygame.time.set_timer(Ball.timer, 0)
-                    print("False")
+                    # print("False")
                     balls_count = 0
 
         game.update(balls, bricks)

@@ -17,7 +17,7 @@ class Brick(pygame.sprite.Sprite):
         # print(self.rect.size)
         # print(self.rect.top, self.rect.left)
 
-        position = (self.rect.left + self.rect.width//2, 
+        position = (self.rect.left + self.rect.width//2,
                     self.rect.top + self.rect.height//2)
         # print(position)
 
