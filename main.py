@@ -38,37 +38,37 @@ def main():
     start_pos = [-1, -1]  # just to initialize?
     end_pos = [-1, -1]
 
-    balls_count = 0
     while True:
-        # print(game.if_next_level)
         if not game.game_on and game.next_level:
             game.generate_next_level(balls, bricks)
-            # print(game.if_next_level)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
 
+            if event.type == game.ball_timer:
+                game.handle_shots(balls)
+
             if event.type == pygame.MOUSEBUTTONDOWN:
-                print('Clicked!')
                 mouseButtons = pygame.mouse.get_pressed()
                 if mouseButtons[0] == 1:
-                    # mousePosition = pygame.mouse.get_pos()
-                    print(event.pos)
                     start_pos = event.pos
 
+
             if event.type == pygame.MOUSEBUTTONUP and not game.game_on:
-                if pygame.mouse.get_pressed()[0] == 0 and start_pos != [-1,-1]:
+                if pygame.mouse.get_pressed()[0] == 0 and start_pos != [-1, -1]:
                     end_pos = event.pos
                     if end_pos[1] > start_pos[1]:
+                        # at the beginning calculate once and set for all balls
+                        # fcn collisions with bricks
                         for ball in balls:
                             ball.calculateVelocity(start_pos, end_pos)
                             # ball.game_on = True
                         # game_on = True
                         game.game_on = True
                         game.next_level = True
-                        pygame.time.set_timer(Ball.timer, 150)
+                        pygame.time.set_timer(game.ball_timer, 150)
                         balls.sprites()[0].game_on = True
                         # ball timer ilość i czas uzależniony od len(balls)
                         # timer_ball on
@@ -85,17 +85,6 @@ def main():
 
 
 
-            if event.type == Ball.timer:
-                
-                balls_count += 1
-                # print("Ball.timer! balls_count = ", balls_count)
-                if balls_count < len(balls):
-                    balls.sprites()[balls_count].game_on = True
-                    # print("True")
-                else:
-                    pygame.time.set_timer(Ball.timer, 0)
-                    # print("False")
-                    balls_count = 0
 
         game.update(balls, bricks)
         FPS_CLOCK.tick(FPS)

@@ -16,6 +16,9 @@ class GameObject():
         self.init_position = (2*self.screen_width//2, 10*self.brick_size)
         self.game_on = False
         self.next_level = True
+        self.shot_counter = 0
+        self.ball_timer = pygame.USEREVENT + 1
+        self.level = 0
 
     @staticmethod
     def show(balls, bricks):
@@ -52,3 +55,11 @@ class GameObject():
 
         # self._update(balls, bricks)
         self.next_level = False
+
+    def handle_shots(self, balls):
+        self.shot_counter += 1
+        if self.shot_counter < len(balls):
+            balls.sprites()[self.shot_counter].game_on = True
+        else:
+            pygame.time.set_timer(self.ball_timer, 0)
+            self.shot_counter = 0

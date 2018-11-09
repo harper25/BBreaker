@@ -3,7 +3,7 @@ import math
 
 
 class Ball(pygame.sprite.Sprite):
-    timer = pygame.USEREVENT + 1
+
 
     def __init__(self, surface, x, y, speed=10, size=10):
         pygame.sprite.Sprite.__init__(self)
@@ -25,7 +25,7 @@ class Ball(pygame.sprite.Sprite):
                 self.vx = -self.vx
             if self.y < self.size/2:
                 self.vy = -self.vy
-            
+
             self.x = self.x + self.vx
             self.y = self.y + self.vy
 
