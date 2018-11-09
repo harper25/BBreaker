@@ -28,6 +28,9 @@ class Brick(pygame.sprite.Sprite):
     def update(self, surface):
         self.draw(surface)
 
+    def move_down(self, brick_size):
+        self.rect.y += brick_size
+
 
 class Text:
     def __init__(self, message, size=22, font_name="comicsansms"):

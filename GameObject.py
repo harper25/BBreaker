@@ -1,3 +1,4 @@
+import random
 import pygame
 from Ball import Ball
 from Brick import Brick
@@ -7,6 +8,7 @@ class GameObject():
 
     def __init__(self, bricks_x=7, bricks_y=11, brick_size=60):
         print('Game!')
+        random.seed()
         self.bricks_x = bricks_x
         self.bricks_y = bricks_y
         self.brick_size = brick_size
@@ -40,20 +42,27 @@ class GameObject():
 
     def generate_next_level(self, balls, bricks):
         print("GENERATE!!!!!!!!!!!!!!!!!!!!!!!")
+        self.level += 1
 
-        br1 = Brick(pygame.Rect(self.brick_size, self.brick_size, self.brick_size, self.brick_size), number=12, color=(30, 240, 20))
-        # br1.draw(self.surface)
+        # add new bricks
+        new_bricks_count = random.randint(1, self.bricks_x-2)
+        positions_x = random.sample(range(0, self.bricks_x), new_bricks_count)
+        # create rect inside Brick class in init, pass brick
+        for i in range(new_bricks_count):
+            bricks.add(Brick(pygame.Rect(positions_x[i]*self.brick_size, 0, self.brick_size, self.brick_size), number=self.level, color=(30, 240, 20)))
+        # move bricks down
+        for brick in bricks:
+            brick.move_down(self.brick_size)
 
-        br2 = Brick(pygame.Rect(3*self.brick_size, 2*self.brick_size, self.brick_size, self.brick_size), number=34, color=(200, 60, 80))
-        # br2.draw(self.surface)
-        bricks.add(br1, br2)
+        # how to optimize? t.i.
+        # ? lru cache - ball movement
+        # ? update only parts of the surface
 
         new_ball = Ball(self.surface, 350, 400, 10, 10)
         balls.add(new_ball)
 
         print('LENGTH BALLS: ', len(balls))
 
-        # self._update(balls, bricks)
         self.next_level = False
 
     def handle_shots(self, balls):
