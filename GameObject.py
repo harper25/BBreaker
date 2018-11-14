@@ -53,6 +53,12 @@ class GameObject():
         # not a bottleneck
         for brick in bricks:
             brick.move_down(self.brick_size)
+            if brick.rect.y >= (self.bricks_y-6)*self.brick_size:
+                # exit(0)
+                bricks.empty()
+                balls.empty()
+                self.level = 0
+                return
 
         # how to optimize? t.i.
         # ? lru cache - ball movement
