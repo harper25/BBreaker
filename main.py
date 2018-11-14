@@ -42,6 +42,8 @@ def main():
         if not game.game_on and game.next_level:
             game.generate_next_level(balls, bricks)
 
+        # handle events. if not game_on - handle new round start / handle
+        # mouse events
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -50,13 +52,15 @@ def main():
             if event.type == game.ball_timer:
                 game.handle_shots(balls)
 
+
+            #
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouseButtons = pygame.mouse.get_pressed()
                 if mouseButtons[0] == 1:
                     start_pos = event.pos
 
 
-            if event.type == pygame.MOUSEBUTTONUP and not game.game_on:
+            if not game.game_on and event.type == pygame.MOUSEBUTTONUP:
                 if pygame.mouse.get_pressed()[0] == 0 and start_pos != [-1, -1]:
                     end_pos = event.pos
                     if end_pos[1] > start_pos[1]:
@@ -83,8 +87,7 @@ def main():
                 else:
                     pygame.mouse.set_cursor(*pygame.cursors.arrow)
 
-
-
+        game.handle_collisions(balls, bricks)
 
         game.update(balls, bricks)
         FPS_CLOCK.tick(FPS)

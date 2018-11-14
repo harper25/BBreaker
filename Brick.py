@@ -2,7 +2,7 @@ import pygame
 
 
 class Brick(pygame.sprite.Sprite):
-    def __init__(self, rect, number, color=(30, 240, 30), border_width=5):
+    def __init__(self, rect, number, color=(30, 240, 30), border_width=4):
         pygame.sprite.Sprite.__init__(self)
         self.rect = rect
         self.number = number
@@ -10,6 +10,7 @@ class Brick(pygame.sprite.Sprite):
         self.border_width = border_width
 
     def draw(self, surface):
+        # surface fill and surface blit?
         black = (0, 0, 0)
         surface.fill(self.color, self.rect)
         surface.fill(black, self.rect.inflate(-2*self.border_width, -2*self.border_width))
@@ -25,10 +26,12 @@ class Brick(pygame.sprite.Sprite):
 
         text.show(surface, position)
 
+    # update
     def update(self, surface):
         self.draw(surface)
 
     def move_down(self, brick_size):
+        # not a bottleneck
         self.rect.y += brick_size
 
 

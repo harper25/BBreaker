@@ -27,10 +27,6 @@ class GameObject():
         print(balls, ' ', bricks)
 
     def update(self, balls, bricks):
-        # if self.game_on:  # nie wchodzi!
-        self._update(balls, bricks)
-
-    def _update(self, balls, bricks):
         color = (10, 50, 30)
         self.surface.fill(color)
         balls.update(self.surface)
@@ -42,6 +38,8 @@ class GameObject():
 
     def generate_next_level(self, balls, bricks):
         print("GENERATE!!!!!!!!!!!!!!!!!!!!!!!")
+
+
         self.level += 1
 
         # add new bricks
@@ -51,6 +49,8 @@ class GameObject():
         for i in range(new_bricks_count):
             bricks.add(Brick(pygame.Rect(positions_x[i]*self.brick_size, 0, self.brick_size, self.brick_size), number=self.level, color=(30, 240, 20)))
         # move bricks down
+
+        # not a bottleneck
         for brick in bricks:
             brick.move_down(self.brick_size)
 
@@ -72,3 +72,20 @@ class GameObject():
         else:
             pygame.time.set_timer(self.ball_timer, 0)
             self.shot_counter = 0
+
+    def handle_collisions(self, balls, bricks):
+        collision = pygame.sprite.groupcollide(balls, bricks, False, False)
+        for ball, bricks_hit in collision.items():
+            for brick in bricks_hit:
+                brick.number -= 1
+                if brick.number <= 0:
+                    bricks.remove(brick)
+
+
+            # if len(bricks_hit) == 1:
+            #     brick = bricks_hit[0]
+
+            #     if brick.rect.centerx:
+            #         pass
+
+            ball.vy = -10

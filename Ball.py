@@ -18,6 +18,8 @@ class Ball(pygame.sprite.Sprite):
         self.game_on = False
         self._color = (255, 255, 255)
         self.draw(surface, self._color)
+        # find another way instead of draw circle all the time
+        # get rect at the beginning and use rect.x, rect.y
 
     def update(self, surface):
         if self.game_on:
@@ -37,7 +39,7 @@ class Ball(pygame.sprite.Sprite):
         self.draw(surface, self._color)
 
     def draw(self, surface, color):
-        pygame.draw.circle(surface, color, (self.x, self.y), self.size)
+        self.rect = pygame.draw.circle(surface, color, (self.x, self.y), self.size)
 
     def calculateVelocity(self, start_pos, end_pos):
         delta = list([start_pos[0]-end_pos[0], start_pos[1]-end_pos[1]])
