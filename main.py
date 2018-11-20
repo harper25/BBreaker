@@ -1,98 +1,29 @@
-
-from Ball import Ball
-from Brick import Brick
 from GameObject import GameObject
 
 import pygame
-import sys
-import os
-import math
+
 
 game = GameObject()
 
-# game.bricks_x, game.bricks_y = 7, 11
-# game.brick_size = 60
-# SCREEN_WIDTH = game.bricks_x * BRICK_SIZE
-# SCREEN_HIGHT = game.bricks_y * BRICK_SIZE
-# DISPLAYSURF = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HIGHT))
-# INIT_POSITION = (SCREEN_WIDTH//2, 10*BRICK_SIZE)
-
+# easy medium hard - probability of high number of boxes each round
 FPS = 60
 FPS_CLOCK = pygame.time.Clock()
-
-WHITE = (255, 255, 255)
-RED = (255, 0, 0)
-BLACK = (0, 0, 0)
 
 pygame.init()
 pygame.display.set_caption('B-Breaker!')
 
 
 def main():
-    # game.show(bricks, balls)
-    # game.update(DISPLAYSURF, balls, bricks)
-    balls = pygame.sprite.Group()
-    bricks = pygame.sprite.Group()
-    ball_rect = pygame.Rect(330, 380, 40, 40)
-
-    start_pos = [-1, -1]  # just to initialize?
-    end_pos = [-1, -1]
-
     while True:
         if not game.game_on and game.next_level:
-            game.generate_next_level(balls, bricks)
+            game.generate_next_level()
 
-        # handle events. if not game_on - handle new round start / handle
-        # mouse events
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
+        game.handle_events()
 
-            if event.type == game.ball_timer:
-                game.handle_shots(balls)
+        game.handle_collisions()
 
-
-            #
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                mouseButtons = pygame.mouse.get_pressed()
-                if mouseButtons[0] == 1:
-                    start_pos = event.pos
-
-
-            if not game.game_on and event.type == pygame.MOUSEBUTTONUP:
-                if pygame.mouse.get_pressed()[0] == 0 and start_pos != [-1, -1]:
-                    end_pos = event.pos
-                    if end_pos[1] > start_pos[1]:
-                        # at the beginning calculate once and set for all balls
-                        # fcn collisions with bricks
-                        for ball in balls:
-                            ball.calculateVelocity(start_pos, end_pos)
-                            # ball.game_on = True
-                        # game_on = True
-                        game.game_on = True
-                        game.next_level = True
-                        pygame.time.set_timer(game.ball_timer, 150)
-                        balls.sprites()[0].game_on = True
-                        # ball timer ilość i czas uzależniony od len(balls)
-                        # timer_ball on
-                        # set first ball.game_on = True
-                start_pos = [-1, -1]
-            if event.type == pygame.MOUSEMOTION:
-                if pygame.mouse.get_pressed()[0] == 1:
-                    intermediate_pos = event.pos
-                    # print(intermediate_pos)
-                if ball_rect.collidepoint(event.pos):
-                    pygame.mouse.set_cursor(*pygame.cursors.diamond)
-                else:
-                    pygame.mouse.set_cursor(*pygame.cursors.arrow)
-
-        game.handle_collisions(balls, bricks)
-
-        game.update(balls, bricks)
+        game.update()
         FPS_CLOCK.tick(FPS)
-
-
 
 
 if __name__ == "__main__":

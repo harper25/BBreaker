@@ -2,6 +2,7 @@ import random
 import pygame
 from Ball import Ball
 from Brick import Brick
+import sys
 
 
 class GameObject():
@@ -9,6 +10,12 @@ class GameObject():
     def __init__(self, bricks_x=7, bricks_y=11, brick_size=60):
         print('Game!')
         random.seed()
+        # self.screen = {'': int}
+
+        self.balls = pygame.sprite.Group()
+        self.bricks = pygame.sprite.Group()
+        self.ball_rect = pygame.Rect(330, 380, 40, 40)
+
         self.bricks_x = bricks_x
         self.bricks_y = bricks_y
         self.brick_size = brick_size
@@ -26,20 +33,18 @@ class GameObject():
     def show(balls, bricks):
         print(balls, ' ', bricks)
 
-    def update(self, balls, bricks):
+    def update(self):
         color = (10, 50, 30)
         self.surface.fill(color)
-        balls.update(self.surface)
-        bricks.update(self.surface)
+        self.balls.update(self.surface)
+        self.bricks.update(self.surface)
         pygame.display.update()
 
-        if {ball.game_on for ball in balls} == {False}:
+        if {ball.game_on for ball in self.balls} == {False}:
             self.game_on = False
 
-    def generate_next_level(self, balls, bricks):
+    def generate_next_level(self):
         print("GENERATE!!!!!!!!!!!!!!!!!!!!!!!")
-
-
         self.level += 1
 
         # add new bricks
@@ -47,16 +52,16 @@ class GameObject():
         positions_x = random.sample(range(0, self.bricks_x), new_bricks_count)
         # create rect inside Brick class in init, pass brick
         for i in range(new_bricks_count):
-            bricks.add(Brick(pygame.Rect(positions_x[i]*self.brick_size, 0, self.brick_size, self.brick_size), number=self.level, color=(30, 240, 20)))
+            self.bricks.add(Brick(pygame.Rect(positions_x[i]*self.brick_size, 0, self.brick_size, self.brick_size), number=self.level, color=(30, 240, 20)))
         # move bricks down
 
         # not a bottleneck
-        for brick in bricks:
+        for brick in self.bricks:
             brick.move_down(self.brick_size)
             if brick.rect.y >= (self.bricks_y-6)*self.brick_size:
                 # exit(0)
-                bricks.empty()
-                balls.empty()
+                self.bricks.empty()
+                self.balls.empty()
                 self.level = 0
                 return
 
@@ -65,27 +70,28 @@ class GameObject():
         # ? update only parts of the surface
 
         new_ball = Ball(self.surface, 350, 400, 10, 10)
-        balls.add(new_ball)
+        self.balls.add(new_ball)
 
-        print('LENGTH BALLS: ', len(balls))
+        print('LENGTH self.balls: ', len(self.balls))
 
         self.next_level = False
 
-    def handle_shots(self, balls):
+    def handle_shots(self):
         self.shot_counter += 1
-        if self.shot_counter < len(balls):
-            balls.sprites()[self.shot_counter].game_on = True
+        if self.shot_counter < len(self.balls):
+            # self.balls.set_game_on(self.shot_counter)
+            self.balls.sprites()[self.shot_counter].game_on = True
         else:
             pygame.time.set_timer(self.ball_timer, 0)
             self.shot_counter = 0
 
-    def handle_collisions(self, balls, bricks):
-        collision = pygame.sprite.groupcollide(balls, bricks, False, False)
-        for ball, bricks_hit in collision.items():
+    def handle_collisions(self):
+        collisions = pygame.sprite.groupcollide(self.balls, self.bricks, False, False)
+        for ball, bricks_hit in collisions.items():
             for brick in bricks_hit:
                 brick.number -= 1
                 if brick.number <= 0:
-                    bricks.remove(brick)
+                    self.bricks.remove(brick)
 
 
             # if len(bricks_hit) == 1:
@@ -95,3 +101,52 @@ class GameObject():
             #         pass
 
             ball.vy = -10
+
+    def handle_events(self):
+        # handle events. if not game_on - handle new round start / handle
+        # mouse events
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            if self.game_on:
+                if event.type == self.ball_timer:
+                    self.handle_shots()
+
+            else:
+                self.handle_mouse_events(event)
+
+    def handle_mouse_events(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mouseButtons = pygame.mouse.get_pressed()
+            if mouseButtons[0] == 1:
+                self.start_pos = event.pos
+
+        if event.type == pygame.MOUSEBUTTONUP:
+            # delete line
+            if self.start_pos and pygame.mouse.get_pressed()[0] == 0:
+                # self._strike()
+                self.end_pos = event.pos
+                self.strike()
+
+        if event.type == pygame.MOUSEMOTION:
+            # pressed - draw line
+            if pygame.mouse.get_pressed()[0] == 1:
+                intermediate_pos = event.pos
+                # print(intermediate_pos)
+            if self.ball_rect.collidepoint(event.pos):
+                pygame.mouse.set_cursor(*pygame.cursors.diamond)
+            else:
+                pygame.mouse.set_cursor(*pygame.cursors.arrow)
+
+    def strike(self):
+        if self.end_pos[1] > self.start_pos[1]:
+            # at the beginning calculate once and set for all self.balls
+            # fcn collisions with bricks
+            for ball in self.balls:
+                ball.calculateVelocity(self.start_pos, self.end_pos)
+            self.game_on = True
+            self.next_level = True
+            pygame.time.set_timer(self.ball_timer, 150)
+            self.balls.sprites()[0].game_on = True
