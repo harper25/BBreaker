@@ -51,12 +51,15 @@ class GameObject():
         positions_x = random.sample(range(0, self.bricks_x), new_bricks_count)
         # create rect inside Brick class in init, pass brick
         for i in range(new_bricks_count):
-            self.bricks.add(Brick(pygame.Rect(positions_x[i]*self.brick_size, 0, self.brick_size, self.brick_size), number=self.level, color=(30, 240, 20)))
-        # move bricks down
+            # (30, 240, 20)
+            color = (255-255//self.level, 255//self.level, 0)
+            self.bricks.add(Brick(pygame.Rect(positions_x[i]*self.brick_size, 0, self.brick_size, self.brick_size), number=self.level, color=color))
 
         # not a bottleneck
+        # rescale color
         for brick in self.bricks:
             brick.move_down(self.brick_size)
+
             if brick.rect.y >= (self.bricks_y-6)*self.brick_size:
                 # exit(0)
                 self.bricks.empty()
@@ -169,7 +172,22 @@ class GameObject():
                     ball.vx = -ball.vx
                     ball.vy = -ball.vy
 
+        # add more strict tolerance for double brick hit/removal
+        for brick in bricks_hit:
+            brick.number -= 1
+            if brick.number <= 0:
+                self.bricks.remove(brick)
+            else:
+                # color, number, level
+                # update color
+                pass
+                # updated_color = list(brick.color)
+                # print('color before update: ', updated_color)
+                # updated_color[0] -= 255//(brick.number+1)
+                # updated_color[1] += 255//(brick.number+1)
 
+                # brick.color = tuple(updated_color)
+                # print('color after update: ', brick.color)
 
     def handle_events(self):
         for event in pygame.event.get():
