@@ -46,7 +46,6 @@ class GameObject():
     def generate_next_level(self):
         print("GENERATE!!!!!!!!!!!!!!!!!!!!!!!")
         self.level += 1
-
         # add new bricks
         new_bricks_count = random.randint(1, self.bricks_x-2)
         positions_x = random.sample(range(0, self.bricks_x), new_bricks_count)
@@ -88,23 +87,91 @@ class GameObject():
     def handle_collisions(self):
         collisions = pygame.sprite.groupcollide(self.balls, self.bricks, False, False)
         for ball, bricks_hit in collisions.items():
-            for brick in bricks_hit:
-                brick.number -= 1
-                if brick.number <= 0:
-                    self.bricks.remove(brick)
+            self.handle_single_collision(ball, bricks_hit)
+
+    def handle_single_collision(self, ball, bricks_hit):
+        if len(bricks_hit) == 2:
+            print('HEEEEEY, 2 BRICKS AT ONCE!')
+            if (bricks_hit[0].rect.center[1] - ball.rect.center[1]) * \
+               (bricks_hit[1].rect.center[1] - ball.rect.center[1]) > 0:
+                ball.vy = -ball.vy
+            else:
+                ball.vx = -ball.vx
+        else:
+            # refactor
+            brick = bricks_hit[0]
+            if ball.vx >= 0 and ball.vy >= 0:
+                if brick.rect.collidepoint(ball.rect.midright):
+                    print('to the left!')
+                    ball.vx = -ball.vx
+                elif brick.rect.collidepoint(ball.rect.midbottom):
+                    print('to the top!')
+                    ball.vy = -ball.vy
+                elif brick.rect.collidepoint(ball.rect.bottomleft):
+                    print('to the top!')
+                    ball.vy = -ball.vy
+                elif brick.rect.collidepoint(ball.rect.topright):
+                    print('to the left!')
+                    ball.vx = -ball.vx
+                else:
+                    print("that's complicated!")
+                    ball.vx = -ball.vx
+                    ball.vy = -ball.vy
+            elif ball.vx >= 0 and ball.vy <= 0:
+                if brick.rect.collidepoint(ball.rect.midright):
+                    print('to the left!')
+                    ball.vx = -ball.vx
+                elif brick.rect.collidepoint(ball.rect.midtop):
+                    print('to the bottom!')
+                    ball.vy = -ball.vy
+                elif brick.rect.collidepoint(ball.rect.bottomleft):
+                    print('to the left!')
+                    ball.vx = -ball.vx
+                elif brick.rect.collidepoint(ball.rect.topleft):
+                    print('to the bottom!')
+                    ball.vy = -ball.vy
+                else:
+                    print("that's complicated!")
+                    ball.vx = -ball.vx
+                    ball.vy = -ball.vy
+            elif ball.vx <= 0 and ball.vy <= 0:
+                if brick.rect.collidepoint(ball.rect.midleft):
+                    print('to the right!')
+                    ball.vx = -ball.vx
+                elif brick.rect.collidepoint(ball.rect.midtop):
+                    print('to the bottom!')
+                    ball.vy = -ball.vy
+                elif brick.rect.collidepoint(ball.rect.bottomleft):
+                    print('to the right!')
+                    ball.vx = -ball.vx
+                elif brick.rect.collidepoint(ball.rect.topright):
+                    print('to the bottom!')
+                    ball.vy = -ball.vy
+                else:
+                    print("that's complicated!")
+                    ball.vx = -ball.vx
+                    ball.vy = -ball.vy
+            else:  # ball.vx <= 0 and ball.vy >= 0
+                if brick.rect.collidepoint(ball.rect.midleft):
+                    print('to the right!')
+                    ball.vx = -ball.vx
+                elif brick.rect.collidepoint(ball.rect.midbottom):
+                    print('to the top!')
+                    ball.vy = -ball.vy
+                elif brick.rect.collidepoint(ball.rect.bottomright):
+                    print('to the top!')
+                    ball.vy = -ball.vy
+                elif brick.rect.collidepoint(ball.rect.topleft):
+                    print('to the right!')
+                    ball.vx = -ball.vx
+                else:
+                    print("that's complicated!")
+                    ball.vx = -ball.vx
+                    ball.vy = -ball.vy
 
 
-            # if len(bricks_hit) == 1:
-            #     brick = bricks_hit[0]
-
-            #     if brick.rect.centerx:
-            #         pass
-
-            ball.vy = -10
 
     def handle_events(self):
-        # handle events. if not game_on - handle new round start / handle
-        # mouse events
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -113,7 +180,6 @@ class GameObject():
             if self.game_on:
                 if event.type == self.ball_timer:
                     self.handle_shots()
-
             else:
                 self.handle_mouse_events(event)
 
@@ -124,14 +190,14 @@ class GameObject():
                 self.start_pos = event.pos
 
         if event.type == pygame.MOUSEBUTTONUP:
-            # delete line
+            # delete line of shot direction
             if self.start_pos and pygame.mouse.get_pressed()[0] == 0:
-                # self._strike()
                 self.end_pos = event.pos
-                self.strike()
+                if self.end_pos[1] > self.start_pos[1]:
+                    self.strike()
 
         if event.type == pygame.MOUSEMOTION:
-            # pressed - draw line
+            # pressed - draw line shot direction
             if pygame.mouse.get_pressed()[0] == 1:
                 intermediate_pos = event.pos
                 # print(intermediate_pos)
@@ -141,12 +207,11 @@ class GameObject():
                 pygame.mouse.set_cursor(*pygame.cursors.arrow)
 
     def strike(self):
-        if self.end_pos[1] > self.start_pos[1]:
-            # at the beginning calculate once and set for all self.balls
-            # fcn collisions with bricks
-            for ball in self.balls:
-                ball.calculateVelocity(self.start_pos, self.end_pos)
-            self.game_on = True
-            self.next_level = True
-            pygame.time.set_timer(self.ball_timer, 150)
-            self.balls.sprites()[0].game_on = True
+        # at the beginning calculate once and set for all self.balls
+        # fcn collisions with bricks
+        for ball in self.balls:
+            ball.calculateVelocity(self.start_pos, self.end_pos)
+        self.game_on = True
+        self.next_level = True
+        pygame.time.set_timer(self.ball_timer, 150)
+        self.balls.sprites()[0].game_on = True

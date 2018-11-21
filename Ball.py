@@ -5,7 +5,7 @@ import math
 class Ball(pygame.sprite.Sprite):
 
 
-    def __init__(self, surface, x, y, speed=10, size=10):
+    def __init__(self, surface, x, y, speed=6, size=10):
         pygame.sprite.Sprite.__init__(self)
         self.screen_width, self.screen_height = \
             pygame.display.get_surface().get_size()
@@ -47,6 +47,3 @@ class Ball(pygame.sprite.Sprite):
         alfa = math.atan2(delta[0], delta[1])
         self.vx = round(self.speed * math.sin(alfa))
         self.vy = round(self.speed * math.cos(alfa))
-
-
-
