@@ -1,25 +1,24 @@
-import pygame
 import math
+import pygame
+import random
 
 
 class Ball(pygame.sprite.Sprite):
+    init_position = [0, 0]
 
-
-    def __init__(self, surface, x, y, speed=6, size=10):
+    def __init__(self, surface, speed=6, size=10):
         pygame.sprite.Sprite.__init__(self)
         self.screen_width, self.screen_height = \
             pygame.display.get_surface().get_size()
-        self.x = x
-        self.y = y
+        self.x = self.init_position[0]
+        self.y = self.init_position[1]
         self.speed = speed
         self.vx = 0
         self.vy = 0
         self.size = size
         self.game_on = False
-        self._color = (255, 255, 255)
-        self.draw(surface, self._color)
-        # find another way instead of draw circle all the time
-        # get rect at the beginning and use rect.x, rect.y
+        self.color = (255, 255, 255)
+        self.draw(surface, self.color)
 
     def update(self, surface):
         if self.game_on:
@@ -27,23 +26,44 @@ class Ball(pygame.sprite.Sprite):
                 self.vx = -self.vx
             if self.y < self.size/2:
                 self.vy = -self.vy
-
             self.x = self.x + self.vx
             self.y = self.y + self.vy
-
-            if self.y > self.screen_height - 2*self.size:
-                self.x = 350
-                self.y = 400
+            if self.y > self.screen_height - 3*self.size:
+                # how to set init pos?
+                self.x = self.init_position[0]
+                self.y = self.init_position[1]
                 self.game_on = False
-
-        self.draw(surface, self._color)
+        self.draw(surface, self.color)
 
     def draw(self, surface, color):
         self.rect = pygame.draw.circle(surface, color, (self.x, self.y), self.size)
 
-    def calculateVelocity(self, start_pos, end_pos):
-        delta = list([start_pos[0]-end_pos[0], start_pos[1]-end_pos[1]])
-        # print("Delta: ", delta)
+    # classmethod?
+    def calculate_init_velocity(self, start_pos, end_pos):
+        delta = [start_pos[0]-end_pos[0], start_pos[1]-end_pos[1]]
         alfa = math.atan2(delta[0], delta[1])
         self.vx = round(self.speed * math.sin(alfa))
         self.vy = round(self.speed * math.cos(alfa))
+
+    def bounce_from_central_corner(self):
+        # calculate angles of bounce from bottom/top and side of the brick
+        # chose random angle from the calculated range
+        print('central corner!')
+        alfa1 = math.atan2(self.vy, -self.vx)
+        alfa2 = math.atan2(-self.vy, self.vx)
+        alfa_bounce = random.uniform(alfa1, alfa2)
+        self.vx = round(self.speed * math.sin(alfa_bounce))
+        self.vy = round(self.speed * math.cos(alfa_bounce))
+
+    def bounce_from_side_corner(self, direction_change):
+        print('side corner!')
+        # change in vy to -vy
+        if direction_change:
+            alfa1 = math.atan2(self.vy, self.vx)
+            alfa2 = math.atan2(-self.vy, self.vx)
+        else:  # change in vx to -vx
+            alfa1 = math.atan2(self.vy, self.vx)
+            alfa2 = math.atan2(self.vy, -self.vx)
+        alfa_bounce = random.uniform(alfa1, alfa2)
+        self.vx = round(self.speed * math.sin(alfa_bounce))
+        self.vy = round(self.speed * math.cos(alfa_bounce))

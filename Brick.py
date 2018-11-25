@@ -34,6 +34,15 @@ class Brick(pygame.sprite.Sprite):
         # not a bottleneck
         self.rect.y += brick_size
 
+    def rescale_color(self, level):
+        # regular bricks
+        if self.number <= level:
+            updated_color = list(self.color)
+            change = (level - self.number) * 255//level
+            updated_color[0] = 255 - change
+            updated_color[1] = change
+            self.color = tuple(updated_color)
+
 
 class Text:
     def __init__(self, message, size=22, font_name="comicsansms"):
