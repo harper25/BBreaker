@@ -5,13 +5,14 @@ import random
 
 class Ball(pygame.sprite.Sprite):
     init_position = [0, 0]
+    out_of_game_counter = 0
 
     def __init__(self, surface, speed=6, size=10):
         pygame.sprite.Sprite.__init__(self)
         self.screen_width, self.screen_height = \
             pygame.display.get_surface().get_size()
-        self.x = self.init_position[0]
-        self.y = self.init_position[1]
+        self.x = Ball.init_position[0]
+        self.y = Ball.init_position[1]
         self.speed = speed
         self.vx = 0
         self.vy = 0
@@ -28,10 +29,12 @@ class Ball(pygame.sprite.Sprite):
                 self.vy = -self.vy
             self.x = self.x + self.vx
             self.y = self.y + self.vy
-            if self.y > self.screen_height - 3*self.size:
-                # how to set init pos?
-                self.x = self.init_position[0]
-                self.y = self.init_position[1]
+            if self.y > self.screen_height - 4*self.size:
+                Ball.out_of_game_counter += 1
+                if Ball.out_of_game_counter == 1:
+                    Ball.init_position[0] = self.x - self.vx
+                self.x = Ball.init_position[0]
+                self.y = Ball.init_position[1]
                 self.game_on = False
         self.draw(surface, self.color)
 

@@ -15,6 +15,9 @@ pygame.display.set_caption('B-Breaker!')
 
 def main():
     while True:
+        # if game.level == 0:
+        #     welcomome_menu()
+        # else:
         # get if not balls in game and get if generate next level
         if not game.game_on and game.next_level:
             game.generate_next_level()
