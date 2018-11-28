@@ -62,6 +62,7 @@ class GameObject():
                 self.level = 0
                 # messagebox score(default 0), play/exit
                 return
+                # return welcome_menu()
         new_ball = Ball(self.surface, 10, 10)
         self.balls.add(new_ball)
         print('LENGTH self.balls: ', len(self.balls))
@@ -94,11 +95,13 @@ class GameObject():
 
     def handle_two_brick_collision(self, ball, bricks_hit):
         print('HEEEEEY, 2 BRICKS AT ONCE!')
-        if (bricks_hit[0].rect.center[1] - ball.rect.center[1]) * \
-           (bricks_hit[1].rect.center[1] - ball.rect.center[1]) > 0:
+        if bricks_hit[0].rect.center[0] == bricks_hit[1].rect.center[0]:
+            ball.vx = -ball.vx
+        elif bricks_hit[0].rect.center[1] == bricks_hit[1].rect.center[1]:
             ball.vy = -ball.vy
         else:
             ball.vx = -ball.vx
+            ball.vy = -ball.vy
 
     def handle_collided_bricks(self, bricks_hit):
         # add more strict tolerance for double brick hit/removal
@@ -142,7 +145,7 @@ class GameObject():
             elif brick.rect.collidepoint(ball.rect.bottomleft):
                 ball.bounce_from_side_corner(0)
             elif brick.rect.collidepoint(ball.rect.topright):
-                ball.bounce_from_side_corner(1)
+                ball.bounce_from_side_corner_special()
             else:
                 ball.bounce_from_central_corner()
 
@@ -181,21 +184,29 @@ class GameObject():
             pygame.mouse.set_cursor(*pygame.cursors.arrow)
             if self.start_pos and pygame.mouse.get_pressed()[0] == 0:
                 self.end_pos = event.pos
-                if self.end_pos[1] > self.start_pos[1]:
-                    self.strike()
+                self.strike()
 
         if event.type == pygame.MOUSEMOTION:
             if pygame.mouse.get_pressed()[0] == 1:
                 # pressed - draw line shot direction
                 intermediate_pos = event.pos
+                # line object, have to update with everything every frame
+                # pygame.draw.aaline(self.surface, (255, 255, 50),
+                #                    self.start_pos, intermediate_pos, 1)
 
     def strike(self):
-        # at the beginning calculate once and set for all self.balls
-        # Ball.calculate then if game_on set init vel
+        if self.end_pos[1] < self.start_pos[1]:
+            return
+
+        alfa = Ball.calculate_strike_angle(self.start_pos, self.end_pos)
+        min_angle = 10 * math.pi/180
+        if alfa < -math.pi + min_angle or alfa > -min_angle:
+            return
+
+        Ball.out_of_game_counter = 0
         for ball in self.balls:
-            ball.calculate_init_velocity(self.start_pos, self.end_pos)
+            ball.set_cartesian_velocity(alfa)
         self.game_on = True
         self.next_level = True
         pygame.time.set_timer(self.ball_timer, 150)
-        # let ball_timer set init vel
         self.balls.sprites()[0].game_on = True

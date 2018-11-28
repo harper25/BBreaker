@@ -41,12 +41,10 @@ class Ball(pygame.sprite.Sprite):
     def draw(self, surface, color):
         self.rect = pygame.draw.circle(surface, color, (self.x, self.y), self.size)
 
-    # classmethod?
-    def calculate_init_velocity(self, start_pos, end_pos):
+    @staticmethod
+    def calculate_strike_angle(start_pos, end_pos):
         delta = [start_pos[0]-end_pos[0], start_pos[1]-end_pos[1]]
-        alfa = math.atan2(delta[0], delta[1])
-        self.vx = round(self.speed * math.sin(alfa))
-        self.vy = round(self.speed * math.cos(alfa))
+        return math.atan2(delta[1], delta[0])
 
     def bounce_from_central_corner(self):
         # calculate angles of bounce from bottom/top and side of the brick
@@ -54,9 +52,13 @@ class Ball(pygame.sprite.Sprite):
         print('central corner!')
         alfa1 = math.atan2(self.vy, -self.vx)
         alfa2 = math.atan2(-self.vy, self.vx)
+        if self.vx > 0:
+            if alfa1 < 0:
+                alfa1 = alfa1 + 2*math.pi
+            else:
+                alfa1 = alfa1 - 2*math.pi
         alfa_bounce = random.uniform(alfa1, alfa2)
-        self.vx = round(self.speed * math.sin(alfa_bounce))
-        self.vy = round(self.speed * math.cos(alfa_bounce))
+        self.set_cartesian_velocity(alfa_bounce)
 
     def bounce_from_side_corner(self, direction_change):
         print('side corner!')
@@ -68,5 +70,16 @@ class Ball(pygame.sprite.Sprite):
             alfa1 = math.atan2(self.vy, self.vx)
             alfa2 = math.atan2(self.vy, -self.vx)
         alfa_bounce = random.uniform(alfa1, alfa2)
-        self.vx = round(self.speed * math.sin(alfa_bounce))
-        self.vy = round(self.speed * math.cos(alfa_bounce))
+        self.set_cartesian_velocity(alfa_bounce)
+
+    def bounce_from_side_corner_special(self):
+        print('side corner!')
+        # change in vy to -vy
+        alfa1 = math.atan2(self.vy, self.vx) + 2*math.pi
+        alfa2 = math.atan2(-self.vy, self.vx)
+        alfa_bounce = random.uniform(alfa1, alfa2)
+        self.set_cartesian_velocity(alfa_bounce)
+
+    def set_cartesian_velocity(self, angle):
+        self.vx = round(self.speed * math.cos(angle))
+        self.vy = round(self.speed * math.sin(angle))
