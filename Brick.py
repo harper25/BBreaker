@@ -14,24 +14,14 @@ class Brick(pygame.sprite.Sprite):
         black = (0, 0, 0)
         surface.fill(self.color, self.rect)
         surface.fill(black, self.rect.inflate(-2*self.border_width, -2*self.border_width))
-        # print(self.number)
-        # print(self.rect.size)
-        # print(self.rect.top, self.rect.left)
-
-        position = (self.rect.left + self.rect.width//2,
-                    self.rect.top + self.rect.height//2)
-        # print(position)
-
+        position = self.rect.center
         text = Text(self.number)
-
         text.show(surface, position)
 
-    # update
     def update(self, surface):
         self.draw(surface)
 
     def move_down(self, brick_size):
-        # not a bottleneck
         self.rect.y += brick_size
 
     def rescale_color(self, level):
@@ -52,8 +42,6 @@ class Text:
         self.font = pygame.font.SysFont(self.font_name, self.size)
 
     def show(self, surface, position, color=(255, 255, 255)):
-        text = self.font.render(self.message, 0, color)  # ?
-        # font = pygame.font.Font(None, 25)  # ?
-
+        text = self.font.render(self.message, 0, color)
         text_rect = text.get_rect(center=position)
         surface.blit(text, text_rect)
