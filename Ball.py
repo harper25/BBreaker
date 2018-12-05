@@ -4,10 +4,12 @@ import random
 
 
 class Ball(pygame.sprite.Sprite):
-    init_position = [0, 0]
-    out_of_game_counter = 0
+    init_position = [None, None]
+    shot_counter = 0
+    init_speed = 10
+    init_velocity = [0, 0]
 
-    def __init__(self, surface, speed=6, size=10):
+    def __init__(self, surface, speed=init_speed, size=10):
         pygame.sprite.Sprite.__init__(self)
         self.screen_width, self.screen_height = \
             pygame.display.get_surface().get_size()
@@ -23,15 +25,20 @@ class Ball(pygame.sprite.Sprite):
 
     def update(self, surface):
         if self.game_on:
-            if self.x < self.size/2 or self.x > self.screen_width - self.size/2:
-                self.vx = -self.vx
+            # check borders
+            if self.x < self.size/2:
+                self.vx = abs(self.vx)
+            elif self.x > self.screen_width - self.size/2:
+                self.vx = -abs(self.vx)
             if self.y < self.size/2:
                 self.vy = -self.vy
+            # calculate next position
             self.x = self.x + self.vx
             self.y = self.y + self.vy
+            # check if ball is out of game
             if self.y > self.screen_height - 4*self.size:
-                Ball.out_of_game_counter += 1
-                if Ball.out_of_game_counter == 1:
+                # set new x position in next round
+                if not Ball.init_position[0]:
                     Ball.init_position[0] = self.x - self.vx
                 self.x = Ball.init_position[0]
                 self.y = Ball.init_position[1]
@@ -57,8 +64,7 @@ class Ball(pygame.sprite.Sprite):
                 alfa1 = alfa1 + 2*math.pi
             else:
                 alfa1 = alfa1 - 2*math.pi
-        alfa_bounce = random.uniform(alfa1, alfa2)
-        self.set_cartesian_velocity(alfa_bounce)
+        self.set_cartesian_velocity(alfa1, alfa2)
 
     def bounce_from_side_corner(self, direction_change):
         print('side corner!')
@@ -69,17 +75,24 @@ class Ball(pygame.sprite.Sprite):
         else:  # change in vx to -vx
             alfa1 = math.atan2(self.vy, self.vx)
             alfa2 = math.atan2(self.vy, -self.vx)
-        alfa_bounce = random.uniform(alfa1, alfa2)
-        self.set_cartesian_velocity(alfa_bounce)
+        self.set_cartesian_velocity(alfa1, alfa2)
 
     def bounce_from_side_corner_special(self):
         print('side corner!')
         # change in vy to -vy
         alfa1 = math.atan2(self.vy, self.vx) + 2*math.pi
         alfa2 = math.atan2(-self.vy, self.vx)
-        alfa_bounce = random.uniform(alfa1, alfa2)
-        self.set_cartesian_velocity(alfa_bounce)
+        self.set_cartesian_velocity(alfa1, alfa2)
 
-    def set_cartesian_velocity(self, angle):
-        self.vx = round(self.speed * math.cos(angle))
-        self.vy = round(self.speed * math.sin(angle))
+    def set_cartesian_velocity(self, alfa1, alfa2):
+        vy = 0
+        while abs(vy) < 3:
+            vx, vy = self.get_cartesian_velocity(alfa1, alfa2)
+        self.vx = vx
+        self.vy = vy
+
+    def get_cartesian_velocity(self, alfa1, alfa2):
+        alfa_bounce = random.uniform(alfa1, alfa2)
+        vx = round(self.speed * math.cos(alfa_bounce))
+        vy = round(self.speed * math.sin(alfa_bounce))
+        return vx, vy
