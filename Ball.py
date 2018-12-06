@@ -46,7 +46,10 @@ class Ball(pygame.sprite.Sprite):
         self.draw(surface, self.color)
 
     def draw(self, surface, color):
-        self.rect = pygame.draw.circle(surface, color, (self.x, self.y), self.size)
+        self.rect = pygame.draw.circle(surface,
+                                       color,
+                                       (self.x, self.y),
+                                       self.size)
 
     @staticmethod
     def calculate_strike_angle(start_pos, end_pos):

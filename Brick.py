@@ -13,7 +13,9 @@ class Brick(pygame.sprite.Sprite):
         # surface fill and surface blit?
         black = (0, 0, 0)
         surface.fill(self.color, self.rect)
-        surface.fill(black, self.rect.inflate(-2*self.border_width, -2*self.border_width))
+        surface.fill(black,
+                     self.rect.inflate(-2*self.border_width,
+                                       -2*self.border_width))
         position = self.rect.center
         text = Text(self.number)
         text.show(surface, position)

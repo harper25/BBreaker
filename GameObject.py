@@ -16,19 +16,20 @@ class GameObject():
         self.balls = pygame.sprite.Group()
         self.bricks = pygame.sprite.Group()
 
-        self.bricks_x = bricks_x
-        self.bricks_y = bricks_y
-        self.brick_size = brick_size
-        self.screen_width = self.brick_size * self.bricks_x
-        self.screen_height = self.brick_size * self.bricks_y
-        self.surface = pygame.display.set_mode((self.screen_width, self.screen_height))
+        self.settings = {'bricks_number': (bricks_x, bricks_y),
+                         'brick_size': brick_size,
+                         'screen_size': (brick_size*bricks_x,
+                                         brick_size*bricks_y,)}
+
+        self.surface = pygame.display.set_mode(self.settings['screen_size'])
         self.game_on = False
         self.next_level = True
         self.level = 0
         Ball.shot_timer = pygame.USEREVENT + 1
         Ball.shot_counter = 0
-        Ball.init_position = [self.screen_width//2,
-                              (self.bricks_y-1)*self.brick_size]
+        Ball.init_position = [self.settings['screen_size'][0]//2,
+                              (self.settings['bricks_number'][1] - 1)
+                              * self.settings['brick_size']]
 
     def update(self):
         color = (20, 10, 30)
@@ -41,14 +42,22 @@ class GameObject():
 
     def generate_next_level(self):
         self.level += 1
-        new_bricks_count = random.randint(1, self.bricks_x-2)
-        positions_x = random.sample(range(0, self.bricks_x), new_bricks_count)
+        bricks_x = self.settings['bricks_number'][0]
+        bricks_y = self.settings['bricks_number'][1]
+
+        brick_size = self.settings['brick_size']
+        new_bricks_count = random.randint(1, bricks_x-2)
+        positions_x = random.sample(range(0, bricks_x), new_bricks_count)
         for i in range(new_bricks_count):
-            self.bricks.add(Brick(pygame.Rect(positions_x[i]*self.brick_size, 0, self.brick_size-2, self.brick_size-2), number=self.level, color=(0, 0, 150)))
+            rect = pygame.Rect(positions_x[i]*brick_size,
+                               0,
+                               brick_size-2,
+                               brick_size-2)
+            self.bricks.add(Brick(rect, number=self.level, color=(0, 0, 150)))
         for brick in self.bricks:
-            brick.move_down(self.brick_size)
+            brick.move_down(brick_size)
             brick.rescale_color(self.level)
-            if brick.rect.y >= (self.bricks_y-2)*self.brick_size:
+            if brick.rect.y >= (bricks_y-2)*brick_size:
                 self.bricks.empty()
                 self.balls.empty()
                 self.level = 0
@@ -118,7 +127,10 @@ class GameObject():
         self.balls.sprites()[0].game_on = True
 
     def handle_collisions(self):
-        collisions = pygame.sprite.groupcollide(self.balls, self.bricks, False, False)
+        collisions = pygame.sprite.groupcollide(self.balls,
+                                                self.bricks,
+                                                False,
+                                                False)
         for ball, bricks_hit in collisions.items():
             if len(bricks_hit) == 3:
                 self.handle_three_brick_collision(ball)
