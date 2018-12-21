@@ -5,3 +5,4 @@ file_version_info.txt
 build
 dist
 main.spec
+.venv
