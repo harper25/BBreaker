@@ -1,9 +1,7 @@
 __pycache__
 .vscode
-a1.py
-file_version_info.txt
+.DS_Store
 build
 dist
-main.spec
 .venv
 venv
