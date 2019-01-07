@@ -5,3 +5,9 @@ build
 dist
 .venv
 venv
+
+bbreaker\dist
+bbreaker\build
+
+*.manifest
+*.spec
