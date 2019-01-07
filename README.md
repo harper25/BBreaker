@@ -1,6 +1,7 @@
 # BBreaker!
 
 **First version finished!!! :)**
+
 A brick breaker game in Python. There are multiple bricks with numbers written on them. The goal is to destroy the bricks by hitting them exactly the same amount of times as the number on each brick indicates. Luckily, there are multiple balls to use each round, but remember... each round the bricks go down and new ones are being created...
 Let's see how long you are going to stand up! Good luck!
 
