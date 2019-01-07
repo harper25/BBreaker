@@ -1,6 +1,7 @@
-from .GameObject import GameObject
-
 import pygame
+
+
+from bbreaker.GameObject import GameObject
 
 
 FPS = 60

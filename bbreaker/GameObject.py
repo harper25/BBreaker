@@ -3,8 +3,8 @@ import pygame
 import random
 import sys
 
-from .Ball import Ball
-from .Brick import Brick
+from bbreaker.Ball import Ball
+from bbreaker.Brick import Brick
 
 
 class GameObject():
