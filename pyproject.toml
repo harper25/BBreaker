@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "BBreaker"
-version = "0.1.0"
+version = "0.2.1"
 description = "Brick Breaker game in Pygame"
 authors = ["Jakub Oles <olesjakubb@gmail.com>"]
 
