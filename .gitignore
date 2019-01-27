@@ -11,3 +11,4 @@ bbreaker\build
 
 *.manifest
 *.spec
+.idea

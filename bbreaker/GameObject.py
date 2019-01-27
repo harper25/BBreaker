@@ -2,6 +2,7 @@ import math
 import pygame
 import random
 import sys
+import numpy as np
 
 from bbreaker.Ball import Ball
 from bbreaker.Brick import Brick
@@ -18,8 +19,8 @@ class GameObject():
 
         self.settings = {'bricks_number': (bricks_x, bricks_y),
                          'brick_size': brick_size,
-                         'screen_size': (brick_size*bricks_x,
-                                         brick_size*bricks_y,)}
+                         'screen_size': (brick_size * bricks_x,
+                                         brick_size * bricks_y,)}
 
         self.surface = pygame.display.set_mode(self.settings['screen_size'])
         self.game_on = False
@@ -27,18 +28,43 @@ class GameObject():
         self.level = 0
         Ball.shot_timer = pygame.USEREVENT + 1
         Ball.shot_counter = 0
-        Ball.init_position = [self.settings['screen_size'][0]//2,
-                              (self.settings['bricks_number'][1] - 1)
-                              * self.settings['brick_size']]
+        Ball.init_position = [self.settings['screen_size'][0] // 2,
+                              (self.settings['bricks_number'][1] - 1) * self.settings['brick_size']]
+
+        # set cursor type
+        pygame.mouse.set_cursor(*pygame.cursors.broken_x)
+        self.current_mpos = Ball.init_position
 
     def update(self):
         color = (20, 10, 30)
         self.surface.fill(color)
         self.balls.update(self.surface)
         self.bricks.update(self.surface)
-        pygame.display.update()
+
         if {ball.game_on for ball in self.balls} == {False}:
             self.game_on = False
+
+        # draw aim line
+        if Ball.init_position[0]:
+            ang = Ball.calculate_strike_angle(Ball.init_position, self.current_mpos)
+            if (math.radians(170) >= ang >= math.radians(10)):
+                y = 0
+                if ang < np.pi / 2:
+                    x = Ball.init_position[0] + Ball.init_position[1] / math.tan(ang)
+                    if x > self.settings['screen_size'][0]:
+                        y = Ball.init_position[1] - (self.settings['screen_size'][0] - Ball.init_position[0]) * math.tan(ang)
+                        x = self.settings['screen_size'][0]
+                elif ang > np.pi / 2:
+                    x = Ball.init_position[0] - Ball.init_position[1] / math.tan(np.pi - ang)
+                    if x < 0:
+                        y = Ball.init_position[1] - Ball.init_position[0] * math.tan(np.pi - ang)
+                        x = 0
+                else:
+                    x = Ball.init_position[0]
+
+                pygame.draw.line(self.surface, (255, 255, 255), Ball.init_position, (x, y), 1)
+
+        pygame.display.update()
 
     def generate_next_level(self):
         self.level += 1
@@ -46,18 +72,18 @@ class GameObject():
         bricks_y = self.settings['bricks_number'][1]
 
         brick_size = self.settings['brick_size']
-        new_bricks_count = random.randint(1, bricks_x-2)
+        new_bricks_count = random.randint(1, bricks_x - 2)
         positions_x = random.sample(range(0, bricks_x), new_bricks_count)
         for i in range(new_bricks_count):
-            rect = pygame.Rect(positions_x[i]*brick_size,
+            rect = pygame.Rect(positions_x[i] * brick_size,
                                0,
-                               brick_size-2,
-                               brick_size-2)
+                               brick_size - 2,
+                               brick_size - 2)
             self.bricks.add(Brick(rect, number=self.level, color=(0, 0, 150)))
         for brick in self.bricks:
             brick.move_down(brick_size)
             brick.rescale_color(self.level)
-            if brick.rect.y >= (bricks_y-2)*brick_size:
+            if brick.rect.y >= (bricks_y - 2) * brick_size:
                 self.bricks.empty()
                 self.balls.empty()
                 self.level = 0
@@ -87,34 +113,20 @@ class GameObject():
                 self.handle_mouse_events(event)
 
     def handle_mouse_events(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            pygame.mouse.set_cursor(*pygame.cursors.broken_x)
-            mouseButtons = pygame.mouse.get_pressed()
-            if mouseButtons[0] == 1:
-                self.start_pos = event.pos
+        self.current_mpos = pygame.mouse.get_pos()
 
-        if event.type == pygame.MOUSEBUTTONUP:
-            pygame.mouse.set_cursor(*pygame.cursors.arrow)
-            if self.start_pos and pygame.mouse.get_pressed()[0] == 0:
-                self.end_pos = event.pos
-                self.strike()
+        if event.type == pygame.MOUSEBUTTONDOWN and Ball.init_position[0]:
+            self.strike()
 
-        if event.type == pygame.MOUSEMOTION:
-            if pygame.mouse.get_pressed()[0] == 1:
-                # pressed - draw line shot direction
-                pass
+        self.update()
 
     def strike(self):
-        if self.end_pos[1] < self.start_pos[1]:
+        alfa = Ball.calculate_strike_angle(Ball.init_position, self.current_mpos)
+        if not (math.radians(170) >= alfa >= math.radians(10)):
             return
 
-        alfa = Ball.calculate_strike_angle(self.start_pos, self.end_pos)
-        min_angle = math.radians(10)
-        if alfa < -math.pi + min_angle or alfa > -min_angle:
-            return
-
-        Ball.init_velocity[0] = round(Ball.init_speed * math.cos(alfa))
-        Ball.init_velocity[1] = round(Ball.init_speed * math.sin(alfa))
+        Ball.init_velocity[0] = Ball.init_speed * math.cos(alfa)
+        Ball.init_velocity[1] = -Ball.init_speed * math.sin(alfa)
         Ball.init_position[0] = None
 
         for ball in self.balls:
