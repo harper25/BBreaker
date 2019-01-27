@@ -26,18 +26,18 @@ class Ball(pygame.sprite.Sprite):
     def update(self, surface):
         if self.game_on:
             # check borders
-            if self.x < self.size/2:
+            if self.x < self.size / 2:
                 self.vx = abs(self.vx)
-            elif self.x > self.screen_width - self.size/2:
+            elif self.x > self.screen_width - self.size / 2:
                 self.vx = -abs(self.vx)
-            if self.y < self.size/2:
+            if self.y < self.size / 2:
                 self.vy = -self.vy
             # calculate next position
             self.x = self.x + self.vx
             self.y = self.y + self.vy
             # check if ball is out of game
-            if self.y > self.screen_height - 4*self.size:
-                # set new x position in next round
+            if self.y >= Ball.init_position[1]:
+                # set new x position for next round
                 if not Ball.init_position[0]:
                     Ball.init_position[0] = self.x - self.vx
                 self.x = Ball.init_position[0]
@@ -46,15 +46,17 @@ class Ball(pygame.sprite.Sprite):
         self.draw(surface, self.color)
 
     def draw(self, surface, color):
-        self.rect = pygame.draw.circle(surface,
-                                       color,
-                                       (self.x, self.y),
-                                       self.size)
+        self.rect = pygame.draw.circle(surface, color, (round(self.x), round(self.y)), self.size)
 
     @staticmethod
     def calculate_strike_angle(start_pos, end_pos):
-        delta = [start_pos[0]-end_pos[0], start_pos[1]-end_pos[1]]
-        return math.atan2(delta[1], delta[0])
+        '''
+        :param start_pos: usually the ball at the bottom of the screen
+        :param end_pos: usually the mouse position
+        :return: zero if `end` is to the right of the `start`, rad(90°) if `end` is above `start`, etc...
+        '''
+        delta = [-start_pos[0] + end_pos[0], -start_pos[1] + end_pos[1]]
+        return math.atan2(-delta[1], delta[0])
 
     def bounce_from_central_corner(self):
         # calculate angles of bounce from bottom/top and side of the brick
@@ -64,9 +66,9 @@ class Ball(pygame.sprite.Sprite):
         alfa2 = math.atan2(-self.vy, self.vx)
         if self.vx > 0:
             if alfa1 < 0:
-                alfa1 = alfa1 + 2*math.pi
+                alfa1 = alfa1 + 2 * math.pi
             else:
-                alfa1 = alfa1 - 2*math.pi
+                alfa1 = alfa1 - 2 * math.pi
         self.set_cartesian_velocity(alfa1, alfa2)
 
     def bounce_from_side_corner(self, direction_change):
@@ -83,7 +85,7 @@ class Ball(pygame.sprite.Sprite):
     def bounce_from_side_corner_special(self):
         print('side corner!')
         # change in vy to -vy
-        alfa1 = math.atan2(self.vy, self.vx) + 2*math.pi
+        alfa1 = math.atan2(self.vy, self.vx) + 2 * math.pi
         alfa2 = math.atan2(-self.vy, self.vx)
         self.set_cartesian_velocity(alfa1, alfa2)
 
