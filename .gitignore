@@ -11,3 +11,5 @@ bbreaker\build
 
 *.manifest
 *.spec
+bbreaker.egg-info
+pip-wheel-metadata
