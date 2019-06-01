@@ -2,7 +2,10 @@
 
 ## First version finished!!! :)
 
+<img align="right" src="https://user-images.githubusercontent.com/37124475/58749146-58af2900-8482-11e9-9ccd-c22ebc7477c0.gif">
+
 A brick breaker game in Python. There are multiple bricks with numbers written on them. The goal is to destroy the bricks by hitting them exactly the same amount of times as the number on each brick indicates. Luckily, there are multiple balls to use each round, but remember... each round the bricks go down and new ones are being created...
+
 Let's see how long you are going to stand up! Good luck!
 
 ## Getting Started & Installing
@@ -10,8 +13,8 @@ Let's see how long you are going to stand up! Good luck!
 ### For playing
 
 * go to [releases](https://github.com/harper25/BBreaker/releases) and download a last release
-* create a virtual environment for the game (ex. `virtualenv .venv`) and activate it
-* run `pip install <last-release-name>`
+* create a virtual environment for the game and activate it
+* run `pip install <last-release>`
 * run `python -m bbreaker`
 * have fun!
 
