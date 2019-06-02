@@ -21,7 +21,26 @@ class Ball(pygame.sprite.Sprite):
         self.size = size
         self.game_on = False
         self.color = (255, 255, 255)
-        self.draw(surface, self.color)
+
+    @classmethod
+    def set_initial_velocity(cls, strike_angle):
+        cls.init_velocity[0] = round(cls.init_speed * math.cos(strike_angle))
+        cls.init_velocity[1] = round(cls.init_speed * math.sin(strike_angle))
+        cls.init_position[0] = None
+
+    @staticmethod
+    def calculate_strike_angle(start_pos, end_pos):
+        if end_pos[1] < start_pos[1]:
+            return None
+
+        delta = [start_pos[0]-end_pos[0], start_pos[1]-end_pos[1]]
+        strike_angle = math.atan2(delta[1], delta[0])
+        min_angle = math.radians(10)
+
+        if strike_angle < -math.pi + min_angle or strike_angle > -min_angle:
+            return None
+
+        return strike_angle
 
     def update(self, surface):
         if self.game_on:
@@ -43,18 +62,14 @@ class Ball(pygame.sprite.Sprite):
                 self.x = Ball.init_position[0]
                 self.y = Ball.init_position[1]
                 self.game_on = False
-        self.draw(surface, self.color)
+        self.draw(surface)
 
-    def draw(self, surface, color):
-        self.rect = pygame.draw.circle(surface,
-                                       color,
-                                       (self.x, self.y),
-                                       self.size)
-
-    @staticmethod
-    def calculate_strike_angle(start_pos, end_pos):
-        delta = [start_pos[0]-end_pos[0], start_pos[1]-end_pos[1]]
-        return math.atan2(delta[1], delta[0])
+    def draw(self, surface):
+        self.rect = pygame.draw.circle(
+            surface,
+            self.color,
+            (self.x, self.y),
+            self.size)
 
     def bounce_from_central_corner(self):
         # calculate angles of bounce from bottom/top and side of the brick
@@ -99,3 +114,75 @@ class Ball(pygame.sprite.Sprite):
         vx = round(self.speed * math.cos(alfa_bounce))
         vy = round(self.speed * math.sin(alfa_bounce))
         return vx, vy
+
+    def handle_brick_collisions(self, bricks_hit):
+        if len(bricks_hit) == 3:
+            self.handle_three_brick_collision()
+        if len(bricks_hit) == 2:
+            self.handle_two_brick_collision(bricks_hit)
+        else:
+            self.handle_one_brick_collision(bricks_hit[0])
+
+    def handle_three_brick_collision(self):
+        print('WHOOHOAA, 3 BRICKS AT ONCE!')
+        self.vy = -self.vy
+        self.vx = -self.vx
+
+    def handle_two_brick_collision(self, bricks_hit):
+        print('HEEEEEY, 2 BRICKS AT ONCE!')
+        if bricks_hit[0].rect.centerx == bricks_hit[1].rect.centerx:
+            self.vx = -self.vx
+        elif bricks_hit[0].rect.centery == bricks_hit[1].rect.centery:
+            self.vy = -self.vy
+        else:
+            self.vx = -self.vx
+            self.vy = -self.vy
+
+    def handle_one_brick_collision(self, brick):
+        if self.vx >= 0 and self.vy >= 0:
+            if brick.rect.collidepoint(self.rect.midright):
+                self.vx = -self.vx
+            elif brick.rect.collidepoint(self.rect.midbottom):
+                self.vy = -self.vy
+            elif brick.rect.collidepoint(self.rect.bottomleft):
+                self.bounce_from_side_corner(1)
+            elif brick.rect.collidepoint(self.rect.topright):
+                self.bounce_from_side_corner(0)
+            else:
+                self.bounce_from_central_corner()
+
+        elif self.vx >= 0 and self.vy <= 0:
+            if brick.rect.collidepoint(self.rect.midright):
+                self.vx = -self.vx
+            elif brick.rect.collidepoint(self.rect.midtop):
+                self.vy = -self.vy
+            elif brick.rect.collidepoint(self.rect.bottomleft):
+                self.bounce_from_side_corner(0)
+            elif brick.rect.collidepoint(self.rect.topleft):
+                self.bounce_from_side_corner(1)
+            else:
+                self.bounce_from_central_corner()
+
+        elif self.vx <= 0 and self.vy <= 0:
+            if brick.rect.collidepoint(self.rect.midleft):
+                self.vx = -self.vx
+            elif brick.rect.collidepoint(self.rect.midtop):
+                self.vy = -self.vy
+            elif brick.rect.collidepoint(self.rect.bottomleft):
+                self.bounce_from_side_corner(0)
+            elif brick.rect.collidepoint(self.rect.topright):
+                self.bounce_from_side_corner_special()
+            else:
+                self.bounce_from_central_corner()
+
+        else:  # self.vx <= 0 and self.vy >= 0
+            if brick.rect.collidepoint(self.rect.midleft):
+                self.vx = -self.vx
+            elif brick.rect.collidepoint(self.rect.midbottom):
+                self.vy = -self.vy
+            elif brick.rect.collidepoint(self.rect.bottomright):
+                self.bounce_from_side_corner(1)
+            elif brick.rect.collidepoint(self.rect.topleft):
+                self.bounce_from_side_corner(0)
+            else:
+                self.bounce_from_central_corner()
