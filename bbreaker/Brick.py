@@ -2,20 +2,23 @@ import pygame
 
 
 class Brick(pygame.sprite.Sprite):
-    def __init__(self, rect, number, color=(30, 240, 30), border_width=4):
+    # should pass position here, not rect
+    def __init__(self, rect, number, color=None, border_width=4):
         pygame.sprite.Sprite.__init__(self)
         self.rect = rect
         self.number = number
-        self.color = color
         self.border_width = border_width
+        self.color = color if color else [30, 240, 30]
 
     def draw(self, surface):
         # surface fill and surface blit?
-        black = (0, 0, 0)
-        surface.fill(self.color, self.rect)
-        surface.fill(black,
-                     self.rect.inflate(-2*self.border_width,
-                                       -2*self.border_width))
+        pygame.draw.rect(
+            surface,
+            self.color,
+            self.rect,
+            self.border_width,
+            border_radius=5,
+            )
         position = self.rect.center
         text = Text(self.number)
         text.show(surface, position)
@@ -29,11 +32,9 @@ class Brick(pygame.sprite.Sprite):
     def rescale_color(self, level):
         # regular bricks
         if self.number <= level:
-            updated_color = list(self.color)
             change = (level - self.number) * 255//level
-            updated_color[0] = 255 - change
-            updated_color[1] = change
-            self.color = tuple(updated_color)
+            self.color[0] = 255 - change
+            self.color[1] = change
 
 
 class Text:

@@ -13,6 +13,8 @@ class GameObject():
         random.seed()
         # self.screen = {'': int}
 
+        self.background_color = (20, 10, 30)
+
         self.balls = pygame.sprite.Group()
         self.bricks = pygame.sprite.Group()
 
@@ -32,10 +34,11 @@ class GameObject():
                               * self.settings['brick_size']]
 
     def update(self):
-        color = (20, 10, 30)
-        self.surface.fill(color)
+        self.surface.fill(self.background_color)
+        # rects_to_update = {}
         self.balls.update(self.surface)
         self.bricks.update(self.surface)
+        # use draw()
         pygame.display.update()
         if {ball.game_on for ball in self.balls} == {False}:
             self.game_on = False
@@ -53,7 +56,7 @@ class GameObject():
                                0,
                                brick_size-2,
                                brick_size-2)
-            self.bricks.add(Brick(rect, number=self.level, color=(0, 0, 150)))
+            self.bricks.add(Brick(rect, number=self.level, color=[0, 0, 150]))
         for brick in self.bricks:
             brick.move_down(brick_size)
             brick.rescale_color(self.level)
@@ -77,6 +80,7 @@ class GameObject():
             Ball.shot_counter = 0
 
     def handle_events(self):
+        # list of allowed pygame events?
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
